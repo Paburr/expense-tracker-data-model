@@ -1,1 +1,0 @@
-# expense-tracker-data-model
