@@ -1,0 +1,79 @@
+erDiagram
+    currency ||--o{ expense : "denomina"
+    currency ||--o{ payment_batch : "liquida en"
+    currency ||--o{ loan : "denomina"
+    currency ||--o{ loan_payment_batch : "liquida en"
+    card ||--o{ expense : "carga el gasto"
+    card ||--o{ payment_batch : "alcance del lote"
+    capture_batch ||--o{ expense : "captura"
+    payment_batch ||--o{ expense : "liquida"
+    loan_payment_batch ||--o{ loan : "liquida"
+    expense ||--o{ detected_duplicate : "es original de"
+    expense ||--o| detected_duplicate : "se declara duplicado de"
+
+    currency {
+        INTEGER id PK
+        TEXT code "GTQ | USD"
+        TEXT symbol
+    }
+
+    card {
+        INTEGER id PK
+        TEXT label
+        INTEGER last_digits
+    }
+
+    capture_batch {
+        INTEGER id PK
+        TEXT channel "manual | ocr | notification"
+        TEXT captured_on
+        TEXT note
+    }
+
+    payment_batch {
+        INTEGER id PK
+        TEXT paid_on
+        INTEGER currency_id FK
+        INTEGER card_id FK "nulo = varias tarjetas"
+        TEXT note
+    }
+
+    expense {
+        INTEGER id PK
+        INTEGER currency_id FK
+        INTEGER card_id FK "nulo = externo/efectivo"
+        INTEGER capture_batch_id FK
+        TEXT description
+        TEXT description_normalized "generada"
+        INTEGER amount_cents "> 0"
+        TEXT spent_on
+        INTEGER is_edited "0 | 1"
+        TEXT created_at
+        INTEGER payment_batch_id FK "nulo = pendiente"
+        TEXT duplicate_signature "generada, unica por lote"
+    }
+
+    detected_duplicate {
+        INTEGER expense_id PK
+        INTEGER original_expense_id FK
+        TEXT duplicate_signature FK "misma firma que ambas copias"
+        TEXT status "pending | paid"
+        TEXT detected_on
+    }
+
+    loan {
+        INTEGER id PK
+        INTEGER currency_id FK
+        TEXT description
+        INTEGER amount_cents "> 0"
+        TEXT lent_on
+        TEXT created_at
+        INTEGER loan_payment_batch_id FK "nulo = pendiente"
+    }
+
+    loan_payment_batch {
+        INTEGER id PK
+        TEXT paid_on
+        INTEGER currency_id FK
+        TEXT note
+    }
